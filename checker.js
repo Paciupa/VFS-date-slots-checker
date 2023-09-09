@@ -1,24 +1,34 @@
-// Specify cities VC is located you want to monitor
+// specify date of birth
+const dateOfBirth = 'xxx'
 
-const vcCities = ['Grodno', 'Lida', 'Minsk', 'Gomel', 'Mogilev'];
+// specify cities VC is located you want to monitor
+const vcCities = ['Minsk', 'Grodno', 'Lida', 'Baranovichi', 'Gomel', 'Mogilev', 'Pinsk', 'Brest'];
+
+// specify visa subcategories
+const visaWorkSubcategory = 'Work D-visa'
+const visaPostalSubcategory = 'Postal D-visa'
+const visaNacionalSubcategory = 'D - Nacional'
 
 // specify visa categories in for each VC you want to check
 const cityToCategoriesMap = {
-  'Grodno': ['Other D-visa', 'Postal D-visa'],
-  'Lida': ['Other D-visa', 'Postal D-visa'],
-  'Minsk': ['D - National'], // , 'Postal D-visa', 'D - National Visa' - glitch
-  'Gomel': ['D - National'], // 'D - National Visa'
-  'Mogilev': ['D - National'] // 'D - National Visa'
+  'Minsk': [visaNacionalSubcategory, visaPostalSubcategory],
+  'Grodno': [visaWorkSubcategory, visaPostalSubcategory],
+  'Lida': [visaWorkSubcategory, visaPostalSubcategory],
+  'Baranovichi': [visaWorkSubcategory, visaPostalSubcategory],
+  'Gomel': [visaNacionalSubcategory],
+  'Mogilev': [visaNacionalSubcategory],
+  'Pinsk': [visaWorkSubcategory, visaPostalSubcategory],
+  'Brest': [visaWorkSubcategory, visaPostalSubcategory]
 }
 
 // text of the message that will be sent to your telegram channel
 const messageForError = 'Oops! Something went wrong';
 
 // specify telegram bot and it's token
-const telegramBotAddress = 'bot123123123:XXXXXYYYYYZZZZZ'
+const telegramBotAddress = 'xxx'
 
 // specify id of the chat you would like to send notifications
-const chatId = '-1111111111';
+const chatId = 'xxx';
 
 // do not modify below this line
 
@@ -31,11 +41,11 @@ const errorHandler = () => {
 }
 
 const sendMessage = (text) => {
-  fetch(`https://api.telegram.org/${telegramBotAddress}/sendmessage`, {
+  fetch(`https://api.telegram.org/bot${telegramBotAddress}/sendmessage`, {
     method: 'POST',
     body: JSON.stringify({
       'chat_id': `${chatId}`,
-      'text': `${messageForError}`
+      'text': `${text}`
     }),
     headers: {
       'Content-type':
@@ -87,17 +97,38 @@ async function eternalChecker(values) {
       // set date of birth
       await timer(5000);
       errorHandler();
-      const datepicker = document.getElementsByClassName('input-group-addon')[0];
-      if (!datepicker) {
+      const datePicker = document.getElementsByClassName('input-group-addon')[0];
+      if (!datePicker) {
         sendMessage('Datepicker undefined');
       }
-      datepicker.click();
+      datePicker.click();
+
+      // const dateInput = document.querySelector('input[ngbdatepicker]');
+      // if (!dateInput) {
+      //   sendMessage('dateInput undefined');
+      // }
+      // dateInput.value = dateOfBirth;
+
+      // const years = document.querySelector('[aria-label="Select year"]');
+      // years.value = '1995';
+
+      // const monthes = document.querySelector('[aria-label="Select month"]');
+      // monthes.value = '8';
+
+      // const days = document.getElementsByClassName('ngb-dp-day ng-star-inserted');
+      // const dayOfBirth = [...days].filter(day => day.innerText === '22')[0];
+      // if (!dayOfBirth) {
+      //   sendMessage('Datepicker undefined');
+      // }
+      // dayOfBirth.click()
+
       const days = document.getElementsByClassName('ngb-dp-day ng-star-inserted');
       const firstDay = [...days].filter(day => day.innerText === '1')[0];
       if (!firstDay) {
         sendMessage('Datepicker undefined');
       }
       firstDay.click()
+
       // set nationality
       selectablePart(3).click();
       const nationalities = document.getElementsByClassName('mat-option-text');
@@ -110,12 +141,12 @@ async function eternalChecker(values) {
       await timer(1000);
       const nextButton = document.getElementsByClassName('mat-raised-button')[0];
       if (nextButton.innerText === 'Продолжить' && nextButton.disabled !== true) {
-        sendMessage(`${vcCity} ${subCategory}`);
+        sendMessage(`${vcCity} - ${subCategory}`);
         return;
       }
       const noDatesAvailableMessage = document.getElementsByClassName('alert-info')[0]
       if (!noDatesAvailableMessage || noDatesAvailableMessage.length === 0 || !noDatesAvailableMessage.innerText.includes('Приносим извинения')) {
-        sendMessage(messageForError);
+        sendMessage(`${messageForError}\n${noDatesAvailableMessage.innerText}`);
         return;
       }
     }
